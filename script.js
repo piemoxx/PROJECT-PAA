@@ -337,3 +337,21 @@ startButton.addEventListener("click", () => {
 randomizeButton.addEventListener("click", () => {
   processMap();
 });
+document.getElementById("uploadImage").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      mapImage.src = event.target.result;
+      mapImage.onload = () => {
+        canvas.width = mapImage.width;
+        canvas.height = mapImage.height;
+        ctx.drawImage(mapImage, 0, 0);
+        processMap();
+      };
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+loadDefaultMap();
