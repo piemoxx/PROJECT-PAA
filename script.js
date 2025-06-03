@@ -73,7 +73,8 @@ function placeEntities() {
     randomizeButton.disabled = false;
 } <<
 <<
-<< < Updated upstream
+<<
+< Updated upstream
 
 // Temukan posisi terdekat yang bukan jalan
 function findNearestNonRoad(roadTile) {
