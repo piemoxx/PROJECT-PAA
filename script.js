@@ -71,7 +71,8 @@ function placeEntities() {
     notification.textContent = "Menunggu kurir untuk memulai...";
     startButton.disabled = false;
     randomizeButton.disabled = false;
-}
+} <<
+<< << < Updated upstream
 
 // Temukan posisi terdekat yang bukan jalan
 function findNearestNonRoad(roadTile) {
@@ -109,70 +110,4 @@ function drawCourier() {
     ctx.fill();
 
     ctx.restore();
-}
-
-function isValidRoadTile(x, y) {
-    const imageData = ctx.getImageData(x * TILE_SIZE, y * TILE_SIZE, 1, 1).data;
-    const r = imageData[0],
-        g = imageData[1],
-        b = imageData[2];
-    return r >= ROAD_COLOR_RANGE.min && r <= ROAD_COLOR_RANGE.max &&
-        g >= ROAD_COLOR_RANGE.min && g <= ROAD_COLOR_RANGE.max &&
-        b >= ROAD_COLOR_RANGE.min && b <= ROAD_COLOR_RANGE.max;
-}
-
-// A* pathfinding algorithm
-// Algoritma pencarian jalur A* untuk menemukan jalur terpendek
-function findPath(start, target) {
-    // Priority queue using an array sorted by f-score
-    const openSet = [{ x: start.x, y: start.y, path: [], g: 0, f: 0 }];
-    const visited = new Set();
-
-    // Calculate heuristic (Manhattan distance)
-    function heuristic(a, b) {
-        return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-    }
-
-    while (openSet.length > 0) {
-        // Sort by f-score and take the lowest
-        openSet.sort((a, b) => a.f - b.f);
-        const current = openSet.shift();
-        const key = `${current.x},${current.y}`;
-
-        if (visited.has(key)) continue;
-        visited.add(key);
-
-        // Check if we're adjacent to target
-        if ((Math.abs(current.x - target.x) === 1 && current.y === target.y) ||
-            (Math.abs(current.y - target.y) === 1 && current.x === target.x)) {
-            return current.path;
-        }
-
-        // Explore neighbors (up, down, left, right)
-        const neighbors = [
-            { x: current.x + 1, y: current.y }, // Right
-            { x: current.x - 1, y: current.y }, // Left
-            { x: current.x, y: current.y + 1 }, // Down
-            { x: current.x, y: current.y - 1 }, // Up
-        ];
-
-        for (const neighbor of neighbors) {
-            if (isValidRoadTile(neighbor.x, neighbor.y)) {
-                // Calculate g score (cost from start)
-                const g = current.g + 1;
-                // Calculate f score (g + heuristic)
-                const f = g + heuristic(neighbor, target);
-
-                openSet.push({
-                    x: neighbor.x,
-                    y: neighbor.y,
-                    path: [...current.path, neighbor],
-                    g: g,
-                    f: f
-                });
-            }
-        }
-    }
-
-    return null; // No path found
 }
