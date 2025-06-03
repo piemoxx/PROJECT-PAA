@@ -69,6 +69,7 @@ function placeEntities() {
   startButton.disabled = false;
   randomizeButton.disabled = false;
 }
+<<<<<<< Updated upstream
 
 // Temukan posisi terdekat yang bukan jalan
 function findNearestNonRoad(roadTile) {
@@ -107,3 +108,4 @@ function drawCourier() {
 
   ctx.restore();
 }
+
