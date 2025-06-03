@@ -179,3 +179,161 @@ function findPath(start, target) {
 
     return null; // No path found
 }
+function moveCourierToDestination() {
+  let target = movingToSource ? source : destination;
+
+  // Find a path to the target
+  const path = findPath(courier, target);
+
+  if (path && path.length > 0) {
+    // Move to the next tile in the path
+    const nextTile = path[0];
+    courier.direction = getDirection(courier, nextTile);
+    courier.x = nextTile.x;
+    courier.y = nextTile.y;
+
+    // Check if the courier is directly adjacent to the target (not diagonally)
+    if ((Math.abs(courier.x - target.x) === 1 && courier.y === target.y) ||
+        (Math.abs(courier.y - target.y) === 1 && courier.x === target.x)) {
+      // Stop the courier
+      clearInterval(movingInterval);
+
+      // Adjust direction to face the flag
+      setTimeout(() => {
+        courier.direction = getDirection(courier, target);
+        drawMap();
+      }, 150);
+
+      if (movingToSource) {
+        notification.textContent = "Sampai di lokasi pengambilan. Mengambil paket...";
+        setTimeout(() => {
+          movingToSource = false;
+          courier.hasPackage = true;
+          // Restart the interval to continue moving to the destination
+          movingInterval = setInterval(moveCourierToDestination, 250);
+        }, 1000); // Menunggu berapa lama kurir berhenti di flag
+      } else {
+        notification.textContent = "Sampai di lokasi pengantaran. Mengantarkan paket...";
+        setTimeout(() => {
+          notification.textContent = "Pengiriman selesai!";
+          startButton.disabled = true;
+          showCelebration(); // Menampilkan animasi selesai pengiriman
+        }, 1000); // 
+      }
+    } else {
+      // Update notification to show progress
+      notification.textContent = movingToSource
+        ? "Kurir sedang menuju ke lokasi pengambilan"
+        : "Kurir sedang menuju ke lokasi pengantaran";
+    }
+  } else {
+    notification.textContent = "Tidak ada jalur yang tersedia!";
+    clearInterval(movingInterval);
+    return;
+  }
+
+  drawMap();
+}
+
+// Get the direction from the current position to the next position
+function getDirection(current, next) {
+  if (next.x > current.x) return "right";
+  if (next.x < current.x) return "left";
+  if (next.y > current.y) return "down";
+  if (next.y < current.y) return "up";
+  return "right"; // Default direction
+}
+
+
+// START: Animasi selesai
+function showCelebration() {
+  const celebrationContainer = document.getElementById('celebrationContainer');
+  celebrationContainer.style.display = 'block';
+
+  const successMessage = document.getElementById('successMessage');
+  successMessage.style.display = 'block';
+
+  createFireworks();
+  createConfetti();
+
+  document.getElementById('continueButton').addEventListener('click', () => {
+    celebrationContainer.style.display = 'none';
+    successMessage.style.display = 'none';
+    celebrationContainer.innerHTML = '';
+    randomizeButton.disabled = false;
+  });
+}
+
+function createFireworks() {
+  const container = document.getElementById('celebrationContainer');
+  const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#0000ff', '#ff00ff'];
+
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * (window.innerHeight / 2);
+
+      for (let j = 0; j < 30; j++) {
+        const particle = document.createElement('div');
+        particle.className = 'firework';
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 50 + Math.random() * 100;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+
+        particle.style.setProperty('--tx', `${tx}px`);
+        particle.style.setProperty('--ty', `${ty}px`);
+
+        container.appendChild(particle);
+
+        setTimeout(() => {
+          if (container.contains(particle)) {
+            container.removeChild(particle);
+          }
+        }, 1000);
+      }
+    }, i * 300);
+  }
+}
+
+function createConfetti() {
+  const container = document.getElementById('celebrationContainer');
+  const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
+
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+
+    const left = Math.random() * 100;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const delay = Math.random() * 3;
+
+    confetti.style.left = `${left}%`;
+    confetti.style.backgroundColor = color;
+    confetti.style.animationDelay = `${delay}s`;
+
+    container.appendChild(confetti);
+
+    setTimeout(() => {
+      if (container.contains(confetti)) {
+        container.removeChild(confetti);
+      }
+    }, 4000 + delay * 1000);
+  }
+}
+// END: Animasi selesai
+
+startButton.addEventListener("click", () => {
+  clearInterval(movingInterval);
+  movingInterval = setInterval(moveCourierToDestination, 250);
+  startButton.disabled = true;
+  randomizeButton.disabled = true;
+});
+
+randomizeButton.addEventListener("click", () => {
+  processMap();
+});
