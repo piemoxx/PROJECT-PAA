@@ -56,3 +56,54 @@ function processMap() {
 
   placeEntities();
 }
+function placeEntities() {
+  if (roadPositions.length < 1 || nonRoadPositions.length < 2) return;
+
+  courier = roadPositions[Math.floor(Math.random() * roadPositions.length)];
+  source = findNearestNonRoad(roadPositions[Math.floor(Math.random() * roadPositions.length)]);
+  destination = findNearestNonRoad(roadPositions[Math.floor(Math.random() * roadPositions.length)]);
+  movingToSource = true;
+
+  drawMap();
+  notification.textContent = "Menunggu kurir untuk memulai...";
+  startButton.disabled = false;
+  randomizeButton.disabled = false;
+}
+
+// Temukan posisi terdekat yang bukan jalan
+function findNearestNonRoad(roadTile) {
+  let candidates = nonRoadPositions.filter(pos =>
+    Math.abs(pos.x - roadTile.x) <= 1 && Math.abs(pos.y - roadTile.y) <= 1
+  );
+  return candidates.length > 0 ? candidates[Math.floor(Math.random() * candidates.length)] : nonRoadPositions[0];
+}
+
+function drawMap() {
+  ctx.drawImage(mapImage, 0, 0);
+  drawFlags();
+  drawCourier();
+}
+
+function drawFlags() {
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(source.x * TILE_SIZE, source.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+  ctx.fillStyle = "red";
+  ctx.fillRect(destination.x * TILE_SIZE, destination.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}
+
+function drawCourier() {
+  ctx.save();
+  ctx.translate((courier.x + 0.5) * TILE_SIZE, (courier.y + 0.5) * TILE_SIZE);
+  let angle = { up: 0, right: Math.PI / 2, down: Math.PI, left: -Math.PI / 2 }[courier.direction];
+  ctx.rotate(angle);
+
+  ctx.fillStyle = "blue";
+  ctx.beginPath();
+  ctx.moveTo(-10, 15);
+  ctx.lineTo(10, 15);
+  ctx.lineTo(0, -15);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
